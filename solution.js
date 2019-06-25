@@ -36,6 +36,10 @@ const firstAnswer = () => {
         mahasiswaField();
         break;
 
+      case '2':
+        jurusanField();
+        break;
+        
       case '3':
         dosenField();
         break;
@@ -175,6 +179,123 @@ const hapusMurid = () => {
   });
 };
 
+const jurusanField = () => {
+  console.log('====================================================');
+  console.log(`silakan pilih opsi di bawah ini
+[1] Daftar Jurusan
+[2] Cari Jurusan
+[3] Tambah Jurusan
+[4] Hapus Jurusan
+[5] Kembali`);
+  console.log('====================================================');
+  return rl.question('masukkan salah satu no, dari opsi diatas: ', answer => {
+    switch (answer) {
+      case '1':
+        daftarJurusan();
+        break;
+
+      case '2':
+        cariJurusan();
+        break;
+
+      case '3':
+        tambahJurusan();
+        break;
+
+      case '4':
+        hapusJurusan();
+        break;
+
+      case '5':
+        kembali();
+        break;
+
+      default:
+        jurusanField();
+        break;
+    }
+  });
+};
+
+const daftarJurusan = () => {
+  const sql = `SELECT jurusanId, namajurusan FROM jurusans`;
+
+  return db.all(sql, [], (err, rows) => {
+    if (err) throw err;
+
+    const table = new Table({
+      head: ['ID', 'Nama Jurusan'],
+      colWidths: [10, 25]
+    });
+
+    rows.forEach(row => {
+      table.push([row.jurusanId, row.namajurusan]);
+    });
+
+    console.log('====================================================');
+    console.log(table.toString());
+    jurusanField();
+  });
+};
+
+const cariJurusan = () => {
+  console.log('====================================================');
+  return rl.question('Masukkan ID Jurusan: ', answer => {
+    const sql = `SELECT jurusanId, namajurusan FROM jurusans WHERE jurusans.jurusanId = ?`;
+    const idJur = answer;
+
+    db.all(sql, [idJur], (err, row) => {
+      if (err) throw err;
+
+      if (row.length > 0) {
+        console.log('====================================================');
+        console.log('Jurusan details');
+        console.log('====================================================');
+        console.log(`id       : ${row[0].jurusanId}`);
+        console.log(`jurusan  : ${row[0].namajurusan}`);
+        console.log('====================================================');
+      } else {
+        console.log(`jurusan dengan id ${idJur} tidak terdaftar`);
+        console.log('====================================================');
+      }
+      jurusanField();
+    });
+  });
+};
+
+const tambahJurusan = () => {
+  console.log('====================================================');
+  console.log('lengkapi data di bawah ini:');
+  const dataJurusan = [];
+  return rl.question('ID: ', jurusanId => {
+    dataJurusan[0] = jurusanId;
+    rl.question('jurusan: ', namajurusan => {
+      dataJurusan[1] = namajurusan;
+      const sql = `INSERT INTO jurusans(jurusanId, namajurusan) VALUES(?, ?)`;
+
+      db.run(sql, dataJurusan, err => {
+        if (err) throw err;
+
+        daftarJurusan();
+      });
+    });
+  });
+};
+
+const hapusJurusan = () => {
+  console.log('====================================================');
+  return rl.question('masukkan ID jurusan yang akan dihapus: ', answer => {
+    const jurusanId = answer;
+    const sql = `DELETE FROM jurusans WHERE jurusanId = ?`;
+
+    db.run(sql, jurusanId, err => {
+      if (err) throw err;
+
+      daftarJurusan();
+    });
+  });
+};
+
 const dosenField = () => {
   console.log('====================================================');
   console.log(`silakan pilih opsi di bawah ini
@@ -262,14 +383,14 @@ const cariDosen = () => {
 const tambahDosen = () => {
   console.log('====================================================');
   console.log('lengkapi data di bawah ini:');
-  const dataMurid = [];
+  const dataDosen = [];
   return rl.question('NIP: ', nip => {
-    dataMurid[0] = nip;
+    dataDosen[0] = nip;
     rl.question('nama dosen: ', namadosen => {
-      dataMurid[1] = namadosen;
+      dataDosen[1] = namadosen;
       const sql = `INSERT INTO dosens(nip, namadosen) VALUES(?, ?)`;
 
-      db.run(sql, dataMurid, err => {
+      db.run(sql, dataDosen, err => {
         if (err) throw err;
 
         daftarDosen();
