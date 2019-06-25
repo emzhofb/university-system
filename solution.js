@@ -11,21 +11,18 @@ let db = new sqlite3.Database('university.db', err => {
   if (err) {
     return console.error(err.message);
   }
-  // console.log('Connected to the in-memory SQlite database.');
 });
 
-let message = `silakan pilih opsi di bawah ini
+const firstQuestion = () => {
+  return new Promise((resolve, reject) => {
+    console.log('====================================================');
+    console.log(`silakan pilih opsi di bawah ini
 [1] Mahasiswa
 [2] Jurusan
 [3] Dosen
 [4] Mata Kuliah
 [5] Kontrak
-[6] Keluar`;
-
-const firstQuestion = () => {
-  return new Promise((resolve, reject) => {
-    console.log('====================================================');
-    console.log(message);
+[6] Keluar`);
     console.log('====================================================');
     firstAnswer();
     resolve();
@@ -46,15 +43,13 @@ const firstAnswer = () => {
 };
 
 const mahasiswaField = () => {
-  message = `silakan pilih opsi di bawah ini
+  console.log('====================================================');
+  console.log(`silakan pilih opsi di bawah ini
 [1] Daftar Murid
 [2] Cari Murid
 [3] Tambah Murid
 [4] Hapus Murid
-[5] Kembali`;
-
-  console.log('====================================================');
-  console.log(message);
+[5] Kembali`);
   console.log('====================================================');
   return rl.question('masukkan salah satu no, dari opsi diatas: ', answer => {
     switch (answer) {
@@ -68,6 +63,14 @@ const mahasiswaField = () => {
 
       case '3':
         tambahMurid();
+        break;
+
+      case '4':
+        hapusMurid();
+        break;
+
+      case '5':
+        kembaliMurid();
         break;
 
       default:
@@ -138,18 +141,36 @@ const tambahMurid = () => {
           dataMurid[3] = jurusan;
           rl.question('umur: ', umur => {
             dataMurid[4] = Number(umur);
-
             const sql = `INSERT INTO mahasiswas(nim, nama, alamat, jurusan, umur) VALUES(?, ?, ?, ?, ?)`;
+
             db.run(sql, dataMurid, err => {
               if (err) throw err;
-  
+
               daftarMurid();
-          })
-          })
+            });
+          });
         });
       });
     });
   });
+};
+
+const hapusMurid = () => {
+  console.log('====================================================');
+  rl.question('masukkan NIM mahasiswa yang akan dihapus: ', answer => {
+    const nim = answer;
+    const sql = `DELETE FROM mahasiswas WHERE nim = ?`;
+
+    db.run(sql, nim, err => {
+      if (err) throw err;
+
+      daftarMurid();
+    });
+  });
+};
+
+const kembaliMurid = () => {
+  firstQuestion();
 };
 
 const main = async () => {
