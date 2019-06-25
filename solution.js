@@ -66,6 +66,10 @@ const mahasiswaField = () => {
         cariMurid();
         break;
 
+      case '3':
+        tambahMurid();
+        break;
+
       default:
         break;
     }
@@ -73,20 +77,20 @@ const mahasiswaField = () => {
 };
 
 const daftarMurid = () => {
-  let sql = `SELECT nim, nama, alamat, jurusan FROM mahasiswas`;
+  const sql = `SELECT nim, nama, alamat, jurusan FROM mahasiswas`;
 
   db.all(sql, [], (err, rows) => {
     if (err) throw err;
 
-    let table = new Table({
+    const table = new Table({
       head: ['NIM', 'Nama', 'Alamat', 'Jurusan'],
-      colWidths: [15, 25, 15, 15]
+      colWidths: [10, 25, 15, 10]
     });
 
     rows.forEach(row => {
-      table.push( [row.nim, row.nama, row.alamat, row.jurusan] );
+      table.push([row.nim, row.nama, row.alamat, row.jurusan]);
     });
-    
+
     console.log('====================================================');
     console.log(table.toString());
     mahasiswaField();
@@ -96,13 +100,15 @@ const daftarMurid = () => {
 const cariMurid = () => {
   console.log('====================================================');
   return rl.question('Masukkan NIM: ', answer => {
-    let sql = `SELECT nim, nama, alamat, jurusan FROM mahasiswas WHERE mahasiswas.nim = ?`;
-    let nim = answer;
+    const sql = `SELECT nim, nama, alamat, jurusan FROM mahasiswas WHERE mahasiswas.nim = ?`;
+    const nim = answer;
 
     db.all(sql, [nim], (err, row) => {
       if (err) throw err;
 
       if (row.length > 0) {
+        console.log('====================================================');
+        console.log('student details');
         console.log('====================================================');
         console.log(`id       : ${row[0].nim}`);
         console.log(`nama     : ${row[0].nama}`);
@@ -114,6 +120,34 @@ const cariMurid = () => {
         console.log('====================================================');
       }
       mahasiswaField();
+    });
+  });
+};
+
+const tambahMurid = () => {
+  console.log('====================================================');
+  console.log('lengkapi data di bawah ini:');
+  const dataMurid = [];
+  return rl.question('NIM: ', nim => {
+    dataMurid[0] = nim;
+    rl.question('nama: ', nama => {
+      dataMurid[1] = nama;
+      rl.question('alamat: ', alamat => {
+        dataMurid[2] = alamat;
+        rl.question('jurusan: ', jurusan => {
+          dataMurid[3] = jurusan;
+          rl.question('umur: ', umur => {
+            dataMurid[4] = Number(umur);
+
+            const sql = `INSERT INTO mahasiswas(nim, nama, alamat, jurusan, umur) VALUES(?, ?, ?, ?, ?)`;
+            db.run(sql, dataMurid, err => {
+              if (err) throw err;
+  
+              daftarMurid();
+          })
+          })
+        });
+      });
     });
   });
 };
