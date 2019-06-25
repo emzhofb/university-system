@@ -36,7 +36,12 @@ const firstAnswer = () => {
         mahasiswaField();
         break;
 
+      case '3':
+        dosenField();
+        break;
+
       default:
+        firstAnswer();
         break;
     }
   });
@@ -70,10 +75,11 @@ const mahasiswaField = () => {
         break;
 
       case '5':
-        kembaliMurid();
+        kembali();
         break;
 
       default:
+        mahasiswaField();
         break;
     }
   });
@@ -82,7 +88,7 @@ const mahasiswaField = () => {
 const daftarMurid = () => {
   const sql = `SELECT nim, nama, alamat, jurusan FROM mahasiswas`;
 
-  db.all(sql, [], (err, rows) => {
+  return db.all(sql, [], (err, rows) => {
     if (err) throw err;
 
     const table = new Table({
@@ -157,7 +163,7 @@ const tambahMurid = () => {
 
 const hapusMurid = () => {
   console.log('====================================================');
-  rl.question('masukkan NIM mahasiswa yang akan dihapus: ', answer => {
+  return rl.question('masukkan NIM mahasiswa yang akan dihapus: ', answer => {
     const nim = answer;
     const sql = `DELETE FROM mahasiswas WHERE nim = ?`;
 
@@ -169,7 +175,124 @@ const hapusMurid = () => {
   });
 };
 
-const kembaliMurid = () => {
+const dosenField = () => {
+  console.log('====================================================');
+  console.log(`silakan pilih opsi di bawah ini
+[1] Daftar Dosen
+[2] Cari Dosen
+[3] Tambah Dosen
+[4] Hapus Dosen
+[5] Kembali`);
+  console.log('====================================================');
+  return rl.question('masukkan salah satu no, dari opsi diatas: ', answer => {
+    switch (answer) {
+      case '1':
+        daftarDosen();
+        break;
+
+      case '2':
+        cariDosen();
+        break;
+
+      case '3':
+        tambahDosen();
+        break;
+
+      case '4':
+        hapusDosen();
+        break;
+
+      case '5':
+        kembali();
+        break;
+
+      default:
+        dosenField();
+        break;
+    }
+  });
+};
+
+const daftarDosen = () => {
+  const sql = `SELECT nip, namadosen FROM dosens`;
+
+  return db.all(sql, [], (err, rows) => {
+    if (err) throw err;
+
+    const table = new Table({
+      head: ['ID', 'Nama'],
+      colWidths: [10, 25]
+    });
+
+    rows.forEach(row => {
+      table.push([row.nip, row.namadosen]);
+    });
+
+    console.log('====================================================');
+    console.log(table.toString());
+    dosenField();
+  });
+};
+
+const cariDosen = () => {
+  console.log('====================================================');
+  return rl.question('Masukkan NIM: ', answer => {
+    const sql = `SELECT nip, namadosen FROM dosens WHERE dosens.nip = ?`;
+    const nip = answer;
+
+    db.all(sql, [nip], (err, row) => {
+      if (err) throw err;
+
+      if (row.length > 0) {
+        console.log('====================================================');
+        console.log('dosen details');
+        console.log('====================================================');
+        console.log(`nip      : ${row[0].nip}`);
+        console.log(`nama     : ${row[0].namadosen}`);
+        console.log('====================================================');
+      } else {
+        console.log(`mahasiswa dengan nim ${nip} tidak terdaftar`);
+        console.log('====================================================');
+      }
+      dosenField();
+    });
+  });
+};
+
+const tambahDosen = () => {
+  console.log('====================================================');
+  console.log('lengkapi data di bawah ini:');
+  const dataMurid = [];
+  return rl.question('NIP: ', nip => {
+    dataMurid[0] = nip;
+    rl.question('nama dosen: ', namadosen => {
+      dataMurid[1] = namadosen;
+      const sql = `INSERT INTO dosens(nip, namadosen) VALUES(?, ?)`;
+
+      db.run(sql, dataMurid, err => {
+        if (err) throw err;
+
+        daftarDosen();
+      });
+    });
+  });
+};
+
+const hapusDosen = () => {
+  console.log('====================================================');
+  return rl.question('masukkan NIP dosen yang akan dihapus: ', answer => {
+    const nip = answer;
+    const sql = `DELETE FROM dosens WHERE nip = ?`;
+
+    db.run(sql, nip, err => {
+      if (err) throw err;
+
+      daftarDosen();
+    });
+  });
+};
+
+const kembali = () => {
   firstQuestion();
 };
 
