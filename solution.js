@@ -39,9 +39,21 @@ const firstAnswer = () => {
       case '2':
         jurusanField();
         break;
-        
+
       case '3':
         dosenField();
+        break;
+
+      case '4':
+        matakuliahField();
+        break;
+
+      case '5':
+        kontrakField();
+        break;
+
+      case '6':
+        keluar();
         break;
 
       default:
@@ -413,9 +425,264 @@ const hapusDosen = () => {
   });
 };
 
+const matakuliahField = () => {
+  console.log('====================================================');
+  console.log(`silakan pilih opsi di bawah ini
+[1] Daftar Mata Kuliah
+[2] Cari Mata Kuliah
+[3] Tambah Mata Kuliah
+[4] Hapus Mata Kuliah
+[5] Kembali`);
+  console.log('====================================================');
+  return rl.question('masukkan salah satu no, dari opsi diatas: ', answer => {
+    switch (answer) {
+      case '1':
+        daftarMataKuliah();
+        break;
+
+      case '2':
+        cariMataKuliah();
+        break;
+
+      case '3':
+        tambahMataKuliah();
+        break;
+
+      case '4':
+        hapusMataKuliah();
+        break;
+
+      case '5':
+        kembali();
+        break;
+
+      default:
+        matakuliahField();
+        break;
+    }
+  });
+};
+
+const daftarMataKuliah = () => {
+  const sql = `SELECT mkId, namamk, sks FROM matakuliahs`;
+
+  return db.all(sql, [], (err, rows) => {
+    if (err) throw err;
+
+    const table = new Table({
+      head: ['ID', 'Mata Kuliah', 'SKS'],
+      colWidths: [10, 25, 10]
+    });
+
+    rows.forEach(row => {
+      table.push([row.mkId, row.namamk, row.sks]);
+    });
+
+    console.log('====================================================');
+    console.log(table.toString());
+    matakuliahField();
+  });
+};
+
+const cariMataKuliah = () => {
+  console.log('====================================================');
+  return rl.question('Masukkan ID: ', answer => {
+    const sql = `SELECT mkId, namamk, sks FROM matakuliahs WHERE matakuliahs.mkId = ?`;
+    const mkId = answer;
+
+    db.all(sql, [mkId], (err, row) => {
+      if (err) throw err;
+
+      if (row.length > 0) {
+        console.log('====================================================');
+        console.log('mata kuliah details');
+        console.log('====================================================');
+        console.log(`id       : ${row[0].mkId}`);
+        console.log(`nama     : ${row[0].namamk}`);
+        console.log(`alamat   : ${row[0].sks}`);
+        console.log('====================================================');
+      } else {
+        console.log(`mata kuliah dengan id ${mkId} tidak terdaftar`);
+        console.log('====================================================');
+      }
+      matakuliahField();
+    });
+  });
+};
+
+const tambahMataKuliah = () => {
+  console.log('====================================================');
+  console.log('lengkapi data di bawah ini:');
+  const dataMataKuliah = [];
+  return rl.question('ID: ', mkId => {
+    dataMataKuliah[0] = mkId;
+    rl.question('mata kuliah: ', namamk => {
+      dataMataKuliah[1] = namamk;
+      rl.question('sks: ', sks => {
+        dataMataKuliah[2] = sks;
+        const sql = `INSERT INTO matakuliahs(mkId, namamk, sks ) VALUES(?, ?, ?)`;
+
+        db.run(sql, dataMataKuliah, err => {
+          if (err) throw err;
+
+          daftarMataKuliah();
+        });
+      });
+    });
+  });
+};
+
+const hapusMataKuliah = () => {
+  console.log('====================================================');
+  return rl.question('masukkan ID mata kuliah yang akan dihapus: ', answer => {
+    const mkId = answer;
+    const sql = `DELETE FROM matakuliahs WHERE mkId = ?`;
+
+    db.run(sql, mkId, err => {
+      if (err) throw err;
+
+      daftarMataKuliah();
+    });
+  });
+};
+
+const kontrakField = () => {
+  console.log('====================================================');
+  console.log(`silakan pilih opsi di bawah ini
+[1] Daftar Kontrak
+[2] Cari Kontrak
+[3] Tambah Kontrak
+[4] Hapus Kontrak
+[5] Kembali`);
+  console.log('====================================================');
+  return rl.question('masukkan salah satu no, dari opsi diatas: ', answer => {
+    switch (answer) {
+      case '1':
+        daftarKontrak();
+        break;
+
+      case '2':
+        cariKontrak();
+        break;
+
+      case '3':
+        tambahKontrak();
+        break;
+
+      case '4':
+        hapusKontrak();
+        break;
+
+      case '5':
+        kembali();
+        break;
+
+      default:
+        kontrakField();
+        break;
+    }
+  });
+};
+
+const daftarKontrak = () => {
+  const sql = `SELECT id, nim, dosen, matakuliah, nilai FROM reports`;
+
+  return db.all(sql, [], (err, rows) => {
+    if (err) throw err;
+
+    const table = new Table({
+      head: ['id', 'nim', 'dosen', 'matakuliah', 'nilai'],
+      colWidths: [10, 10, 10, 10, 10]
+    });
+
+    rows.forEach(row => {
+      table.push([row.id, row.nim, row.dosen, row.matakuliah, row.nilai]);
+    });
+
+    console.log('====================================================');
+    console.log(table.toString());
+    kontrakField();
+  });
+};
+
+const cariKontrak = () => {
+  console.log('====================================================');
+  return rl.question('Masukkan ID: ', answer => {
+    const sql = `SELECT id, nim, dosen, matakuliah, nilai FROM reports WHERE reports.id = ?`;
+    const id = answer;
+
+    db.all(sql, [id], (err, row) => {
+      if (err) throw err;
+
+      if (row.length > 0) {
+        console.log('====================================================');
+        console.log('student details');
+        console.log('====================================================');
+        console.log(`id         : ${row[0].id}`);
+        console.log(`nim        : ${row[0].nim}`);
+        console.log(`dosen      : ${row[0].dosen}`);
+        console.log(`matakuliah : ${row[0].matakuliah}`);
+        console.log(`nilai      : ${row[0].nilai}`);
+        console.log('====================================================');
+      } else {
+        console.log(`kontrak dengan id ${id} tidak terdaftar`);
+        console.log('====================================================');
+      }
+      kontrakField();
+    });
+  });
+};
+
+const tambahKontrak = () => {
+  console.log('====================================================');
+  console.log('lengkapi data di bawah ini:');
+  const dataKontrak = [];
+  return rl.question('ID: ', id => {
+    dataKontrak[0] = id;
+    rl.question('nim: ', nim => {
+      dataKontrak[1] = nim;
+      rl.question('dosen: ', dosen => {
+        dataKontrak[2] = dosen;
+        rl.question('matakuliah: ', matakuliah => {
+          dataKontrak[3] = matakuliah;
+          rl.question('nilai: ', nilai => {
+            dataKontrak[4] = nilai;
+            const sql = `INSERT INTO reports(id, nim, dosen, matakuliah, nilai) VALUES(?, ?, ?, ?, ?)`;
+
+            db.run(sql, dataKontrak, err => {
+              if (err) throw err;
+
+              daftarKontrak();
+            });
+          });
+        });
+      });
+    });
+  });
+};
+
+const hapusKontrak = () => {
+  console.log('====================================================');
+  return rl.question('masukkan ID kontrak yang akan dihapus: ', answer => {
+    const id = answer;
+    const sql = `DELETE FROM reports WHERE id = ?`;
+
+    db.run(sql, id, err => {
+      if (err) throw err;
+
+      daftarKontrak();
+    });
+  });
+};
+
 const kembali = () => {
   firstQuestion();
 };
+
+const keluar = () => {
+  console.log('Kamu telah keluar.');
+  rl.close();
+}
 
 const main = async () => {
   await firstQuestion();
