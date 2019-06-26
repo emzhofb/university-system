@@ -13,6 +13,55 @@ let db = new sqlite3.Database('university.db', err => {
   }
 });
 
+let username;
+
+const login = () => {
+  console.log('====================================================');
+  console.log('Welcome to Universitas Pendidikan Indonesia');
+  console.log('Jl Setiabudhi No. 255');
+  console.log('====================================================');
+  rl.question('username: ', answer => {
+    const sql = `SELECT username FROM users WHERE username = ?`;
+    username = answer;
+
+    db.all(sql, [username], (err, name) => {
+      if (err) throw err;
+
+      console.log('====================================================');
+      rl.question('password: ', answer => {
+        const sql = `SELECT password FROM users WHERE username = ?`;
+
+        db.all(sql, [username], (err, pass) => {
+          if (err) throw err;
+
+          if (pass.length > 0) {
+            welcome();
+          } else {
+            console.log('username atau password salah.');
+            login();
+          }
+        });
+      });
+    });
+  });
+};
+
+const welcome = () => {
+  console.log('====================================================');
+  const sql = `SELECT username, level FROM users WHERE username = ?`;
+
+  db.all(sql, [username], (err, rows) => {
+    if (err) throw err;
+
+    if (rows.length > 0) {
+      console.log(
+        `Welcome, ${rows[0].username}. Your access level is: ${rows[0].level}`
+      );
+      main();
+    }
+  });
+};
+
 const firstQuestion = () => {
   return new Promise((resolve, reject) => {
     console.log('====================================================');
@@ -384,7 +433,7 @@ const cariDosen = () => {
         console.log(`nama     : ${row[0].namadosen}`);
         console.log('====================================================');
       } else {
-        console.log(`mahasiswa dengan nim ${nip} tidak terdaftar`);
+        console.log(`dosen dengan nip ${nip} tidak terdaftar`);
         console.log('====================================================');
       }
       dosenField();
@@ -616,7 +665,7 @@ const cariKontrak = () => {
 
       if (row.length > 0) {
         console.log('====================================================');
-        console.log('student details');
+        console.log('kontrak details');
         console.log('====================================================');
         console.log(`id         : ${row[0].id}`);
         console.log(`nim        : ${row[0].nim}`);
@@ -680,12 +729,14 @@ const kembali = () => {
 };
 
 const keluar = () => {
+  console.log('====================================================');
   console.log('Kamu telah keluar.');
-  rl.close();
-}
+
+  login();
+};
 
 const main = async () => {
   await firstQuestion();
 };
 
-main();
+login();
