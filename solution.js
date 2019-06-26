@@ -29,12 +29,13 @@ const login = () => {
 
       console.log('====================================================');
       rl.question('password: ', answer => {
+        const pw = answer;
         const sql = `SELECT password FROM users WHERE username = ?`;
 
         db.all(sql, [username], (err, pass) => {
           if (err) throw err;
 
-          if (pass.length > 0) {
+          if (pw === pass[0].password) {
             welcome();
           } else {
             console.log('username atau password salah.');
