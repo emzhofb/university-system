@@ -35,7 +35,7 @@ const login = () => {
         db.all(sql, [username], (err, pass) => {
           if (err) throw err;
 
-          if (pw === pass[0].password) {
+          if (pass.length > 0 && pw === pass[0].password) {
             welcome();
           } else {
             console.log('username atau password salah.');
